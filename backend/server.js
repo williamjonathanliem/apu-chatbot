@@ -16,14 +16,14 @@ async function callAI(messages) {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                model: "llama3.2:1b",
+                model: "llama3.2",
                 messages,
                 stream: false,
-                options: {
-                    temperature: 0.7,
-                    top_p: 0.9,
-                    repeat_penalty: 1.2,
-                    num_predict: 300,
+                options: {  //ai yappy controls
+                    temperature: 0.4, //facts and yaps. lower the factual
+                    top_p: 0.85,
+                    repeat_penalty: 1.3,
+                    num_predict: 200,
                 }
             })
         });
