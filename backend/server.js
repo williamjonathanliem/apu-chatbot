@@ -19,8 +19,8 @@ async function callAI(messages) {
                 model: "llama3.2",
                 messages,
                 stream: false,
-                options: {  //ai yappy controls
-                    temperature: 0.4, //facts and yaps. lower the factual
+                options: {
+                    temperature: 0.4,
                     top_p: 0.85,
                     repeat_penalty: 1.3,
                     num_predict: 200,
@@ -34,34 +34,53 @@ async function callAI(messages) {
     } else {
         const models = [
             "meta-llama/llama-3.2-3b-instruct:free",
+            "google/gemma-3-4b-it:free",
             "mistralai/mistral-7b-instruct:free",
-            "google/gemma-3-4b-it:free"
+            "qwen/qwen2.5-vl-3b-instruct:free",
+            "microsoft/phi-4-reasoning-plus:free",
         ];
 
-        for (let attempt = 0; attempt < 4; attempt++) {
-            const model = models[attempt % models.length];
+        let lastError = "";
+
+        for (let attempt = 0; attempt < models.length; attempt++) {
+            const model = models[attempt];
             try {
+                console.log(`Trying model: ${model}`);
                 const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                     method: "POST",
                     headers: {
                         "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({ model, messages })
+                    body: JSON.stringify({
+                        model,
+                        messages,
+                        temperature: 0.4,
+                        max_tokens: 300
+                    })
                 });
+
                 const data = await response.json();
-                if (data.choices) return data.choices[0].message.content;
-                if (data.error?.code === 429 || data.error?.code === 503) {
-                    console.log(`Model ${model} busy, trying next...`);
-                    await new Promise(r => setTimeout(r, 2000));
-                    continue;
+
+                if (data.choices?.[0]?.message?.content) {
+                    console.log(`Success with model: ${model}`);
+                    return data.choices[0].message.content;
                 }
-                throw new Error(data.error?.message || "Unknown error");
+
+                lastError = data.error?.message || "No content returned";
+                console.log(`Model ${model} failed: ${lastError}`);
+
+                if (data.error?.code === 429 || data.error?.code === 503) {
+                    await new Promise(r => setTimeout(r, 1500));
+                }
+
             } catch (err) {
-                if (attempt === 3) throw err;
+                lastError = err.message;
+                console.log(`Model ${model} threw error: ${lastError}`);
             }
         }
-        throw new Error("All models failed");
+
+        throw new Error(`All models failed. Last error: ${lastError}`);
     }
 }
 
