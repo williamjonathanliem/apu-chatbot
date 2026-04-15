@@ -12,7 +12,7 @@ const SUGGESTED = [
 
 export default function App() {
   const [messages, setMessages] = useState([
-    { role: "assistant", content: "Hi! I'm APUBot 👋 Your student assistant for Asia Pacific University. Ask me anything about campus, courses, accommodation, or student life!" }
+    { role: "assistant", content: "Hi! I'm APUBot, your student assistant for Asia Pacific University. What can I help you with today?" }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,7 +31,8 @@ export default function App() {
     setMessages(prev => [...prev, { role: "user", content: msg }]);
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3001/chat", {
+      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+      const res = await fetch(`${API_URL}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: msg })
@@ -44,7 +45,7 @@ export default function App() {
     } catch {
       setMessages(prev => [...prev, {
         role: "assistant",
-        content: "I couldn't reach the server. Make sure the backend is running on port 3001."
+        content: "Couldn't reach the server. Make sure the backend is running."
       }]);
     } finally {
       setLoading(false);
@@ -52,164 +53,129 @@ export default function App() {
   }
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%)",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: "20px",
-      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-    }}>
+    <>
+      <style>{`
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f5f5f7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        #root { width: 100%; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .md p { margin-bottom: 6px; line-height: 1.6; }
+        .md p:last-child { margin-bottom: 0; }
+        .md ul, .md ol { padding-left: 18px; margin-bottom: 6px; }
+        .md li { margin-bottom: 3px; line-height: 1.55; }
+        .md strong { font-weight: 600; }
+        .md h1,.md h2,.md h3 { font-size: 14px; font-weight: 600; margin-bottom: 6px; margin-top: 8px; }
+        .messages::-webkit-scrollbar { width: 4px; }
+        .messages::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 4px; }
+        textarea:focus { outline: none; border-color: #1d1d1f !important; }
+        textarea::placeholder { color: #aaa; }
+        @keyframes bounce {
+          0%,60%,100% { transform: translateY(0); }
+          30% { transform: translateY(-4px); }
+        }
+        .dot { width: 6px; height: 6px; border-radius: 50%; background: #ccc; animation: bounce 1.2s infinite; }
+        .chip:hover { background: #f0f0f0 !important; border-color: #ccc !important; }
+        .send-btn:hover { background: #333 !important; }
+        .send-btn:disabled { background: #e5e5e5 !important; cursor: not-allowed; }
+      `}</style>
 
-      {/* Outer glow card */}
       <div style={{
-        width: "100%",
-        maxWidth: "860px",
-        height: "88vh",
-        borderRadius: "24px",
-        background: "rgba(255,255,255,0.06)",
-        border: "1px solid rgba(255,255,255,0.12)",
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-        backdropFilter: "blur(20px)",
+        width: "100%", maxWidth: "780px", height: "90vh",
+        background: "#fff", borderRadius: "20px",
+        border: "1px solid #e8e8e8",
+        display: "flex", flexDirection: "column", overflow: "hidden",
+        boxShadow: "0 2px 20px rgba(0,0,0,0.06)"
       }}>
 
         {/* Header */}
         <div style={{
-          padding: "18px 24px",
-          background: "rgba(255,255,255,0.08)",
-          borderBottom: "1px solid rgba(255,255,255,0.1)",
-          display: "flex",
-          alignItems: "center",
-          gap: "14px"
+          padding: "16px 22px",
+          borderBottom: "1px solid #f0f0f0",
+          display: "flex", alignItems: "center", gap: "12px"
         }}>
           <div style={{
-            width: "46px", height: "46px", borderRadius: "14px",
-            background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+            width: "38px", height: "38px", borderRadius: "10px",
+            background: "#1d1d1f",
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: "22px", flexShrink: 0
+            fontSize: "18px", flexShrink: 0
           }}>🎓</div>
           <div>
-            <div style={{ color: "white", fontWeight: "700", fontSize: "17px", letterSpacing: "-0.3px" }}>APUBot</div>
-            <div style={{ color: "rgba(255,255,255,0.55)", fontSize: "13px" }}>Asia Pacific University Assistant</div>
+            <div style={{ fontSize: "15px", fontWeight: "600", color: "#1d1d1f", letterSpacing: "-0.2px" }}>APUBot</div>
+            <div style={{ fontSize: "12px", color: "#888" }}>APU Student Assistant</div>
           </div>
-          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "7px" }}>
-            <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#4ade80", boxShadow: "0 0 8px #4ade80" }} />
-            <span style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px" }}>Online</span>
+          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "6px" }}>
+            <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#34c759" }} />
+            <span style={{ fontSize: "12px", color: "#888" }}>Online</span>
           </div>
         </div>
 
-        {/* Messages area */}
-        <div style={{
-          flex: 1,
-          overflowY: "auto",
-          padding: "24px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "4px",
-          scrollbarWidth: "thin",
-          scrollbarColor: "rgba(255,255,255,0.15) transparent"
+        {/* Messages */}
+        <div className="messages" style={{
+          flex: 1, overflowY: "auto", padding: "24px 22px",
+          display: "flex", flexDirection: "column"
         }}>
-
           {messages.map((msg, i) => (
             <div key={i} style={{
               display: "flex",
-              flexDirection: msg.role === "user" ? "row-reverse" : "row",
-              alignItems: "flex-end",
-              gap: "10px",
-              marginBottom: "12px"
+              justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
+              marginBottom: "14px",
+              alignItems: "flex-end", gap: "8px"
             }}>
-              {/* Avatar */}
+              {msg.role === "assistant" && (
+                <div style={{
+                  width: "28px", height: "28px", borderRadius: "8px",
+                  background: "#1d1d1f", display: "flex",
+                  alignItems: "center", justifyContent: "center",
+                  fontSize: "13px", flexShrink: 0
+                }}>🎓</div>
+              )}
               <div style={{
-                width: "34px", height: "34px", borderRadius: "10px", flexShrink: 0,
-                background: msg.role === "assistant"
-                  ? "linear-gradient(135deg, #6366f1, #8b5cf6)"
-                  : "rgba(255,255,255,0.15)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: "16px"
-              }}>
-                {msg.role === "assistant" ? "🎓" : "👤"}
-              </div>
-
-              {/* Bubble */}
-              <div style={{
-                maxWidth: "68%",
-                padding: "12px 16px",
-                borderRadius: msg.role === "assistant" ? "4px 18px 18px 18px" : "18px 4px 18px 18px",
-                background: msg.role === "assistant"
-                  ? "rgba(255,255,255,0.1)"
-                  : "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                color: "white",
+                maxWidth: "72%",
+                padding: "11px 15px",
+                borderRadius: msg.role === "user" ? "16px 16px 4px 16px" : "4px 16px 16px 16px",
+                background: msg.role === "user" ? "#1d1d1f" : "#f5f5f7",
+                color: msg.role === "user" ? "#fff" : "#1d1d1f",
                 fontSize: "14px",
-                lineHeight: "1.65",
-                border: msg.role === "assistant" ? "1px solid rgba(255,255,255,0.12)" : "none",
-                backdropFilter: "blur(10px)"
+                lineHeight: "1.6"
               }}>
-                <div className="md-content">
-                  <ReactMarkdown>{msg.content}</ReactMarkdown>
-                </div>
+                <div className="md"><ReactMarkdown>{msg.content}</ReactMarkdown></div>
               </div>
             </div>
           ))}
 
-          {/* Typing indicator */}
+          {/* Typing dots */}
           {loading && (
-            <div style={{ display: "flex", alignItems: "flex-end", gap: "10px", marginBottom: "12px" }}>
+            <div style={{ display: "flex", alignItems: "flex-end", gap: "8px", marginBottom: "14px" }}>
               <div style={{
-                width: "34px", height: "34px", borderRadius: "10px",
-                background: "linear-gradient(135deg, #8284ffff, rgba(240, 233, 255, 1))",
-                display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px"
+                width: "28px", height: "28px", borderRadius: "8px",
+                background: "#1d1d1f", display: "flex",
+                alignItems: "center", justifyContent: "center", fontSize: "13px"
               }}>🎓</div>
               <div style={{
-                padding: "14px 18px",
-                background: "rgba(255,255,255,0.1)",
-                borderRadius: "4px 18px 18px 18px",
-                border: "1px solid rgba(255,255,255,0.12)",
-                display: "flex", gap: "5px", alignItems: "center"
+                padding: "13px 16px", background: "#f5f5f7",
+                borderRadius: "4px 16px 16px 16px",
+                display: "flex", gap: "4px", alignItems: "center"
               }}>
-                {[0, 1, 2].map(i => (
-                  <div key={i} style={{
-                    width: "7px", height: "7px", borderRadius: "50%",
-                    background: "rgba(255,255,255,0.6)",
-                    animation: "pulse 1.2s infinite",
-                    animationDelay: `${i * 0.2}s`
-                  }} />
-                ))}
+                <div className="dot" style={{ animationDelay: "0s" }} />
+                <div className="dot" style={{ animationDelay: "0.2s" }} />
+                <div className="dot" style={{ animationDelay: "0.4s" }} />
               </div>
             </div>
           )}
 
-          {/* Suggested questions */}
+          {/* Suggested chips */}
           {showSuggestions && (
-            <div style={{ marginTop: "8px" }}>
-              <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "12px", marginBottom: "10px", letterSpacing: "0.05em", textTransform: "uppercase" }}>
-                Suggested questions
+            <div style={{ marginTop: "4px" }}>
+              <p style={{ fontSize: "11px", color: "#aaa", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Suggested
               </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "7px" }}>
                 {SUGGESTED.map((q, i) => (
-                  <button key={i} onClick={() => sendMessage(q)} style={{
-                    padding: "8px 14px",
-                    borderRadius: "20px",
-                    border: "1px solid rgba(255,255,255,0.2)",
-                    background: "rgba(255,255,255,0.07)",
-                    color: "rgba(255,255,255,0.85)",
-                    fontSize: "13px",
-                    cursor: "pointer",
-                    transition: "all 0.15s",
-                    backdropFilter: "blur(10px)"
-                  }}
-                    onMouseEnter={e => {
-                      e.target.style.background = "rgba(255,255,255,0.15)";
-                      e.target.style.borderColor = "rgba(255,255,255,0.35)";
-                    }}
-                    onMouseLeave={e => {
-                      e.target.style.background = "rgba(255,255,255,0.07)";
-                      e.target.style.borderColor = "rgba(255,255,255,0.2)";
-                    }}
-                  >{q}</button>
+                  <button key={i} className="chip" onClick={() => sendMessage(q)} style={{
+                    padding: "7px 13px", borderRadius: "20px",
+                    border: "1px solid #e5e5e5", background: "#fafafa",
+                    color: "#1d1d1f", fontSize: "13px", cursor: "pointer",
+                    transition: "all 0.12s"
+                  }}>{q}</button>
                 ))}
               </div>
             </div>
@@ -218,14 +184,11 @@ export default function App() {
           <div ref={bottomRef} />
         </div>
 
-        {/* Input bar */}
+        {/* Input */}
         <div style={{
-          padding: "16px 20px",
-          background: "rgba(255,255,255,0.05)",
-          borderTop: "1px solid rgba(255,255,255,0.1)",
-          display: "flex",
-          gap: "10px",
-          alignItems: "flex-end"
+          padding: "14px 18px",
+          borderTop: "1px solid #f0f0f0",
+          display: "flex", gap: "10px", alignItems: "flex-end"
         }}>
           <textarea
             value={input}
@@ -239,59 +202,34 @@ export default function App() {
             placeholder="Ask me anything about APU..."
             rows={1}
             style={{
-              flex: 1,
-              padding: "12px 16px",
-              borderRadius: "14px",
-              border: "1px solid rgba(255,255,255,0.15)",
-              background: "rgba(255,255,255,0.08)",
-              color: "white",
+              flex: 1, padding: "10px 14px",
+              borderRadius: "12px",
+              border: "1px solid #e5e5e5",
+              background: "#fafafa",
+              color: "#1d1d1f",
               fontSize: "14px",
-              resize: "none",
-              outline: "none",
-              fontFamily: "inherit",
-              lineHeight: "1.5",
-              maxHeight: "120px",
-              backdropFilter: "blur(10px)"
+              resize: "none", fontFamily: "inherit",
+              lineHeight: "1.5", maxHeight: "120px"
             }}
           />
           <button
+            className="send-btn"
             onClick={() => sendMessage()}
             disabled={!input.trim() || loading}
             style={{
-              width: "44px", height: "44px",
-              borderRadius: "14px",
-              background: input.trim() && !loading
-                ? "linear-gradient(135deg, #d8d9ffff, #8b5cf6)"
-                : "rgba(255,255,255,0.08)",
-              border: "1px solid rgba(255,255,255,0.15)",
-              cursor: input.trim() && !loading ? "pointer" : "not-allowed",
+              width: "40px", height: "40px", borderRadius: "12px",
+              background: input.trim() && !loading ? "#1d1d1f" : "#e5e5e5",
+              border: "none", cursor: "pointer",
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "18px",
-              transition: "all 0.15s",
-              flexShrink: 0
+              flexShrink: 0, transition: "background 0.12s", fontSize: "16px"
             }}
           >
-            {loading ? "⏳" : "➤"}
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M2 8L14 8M14 8L9 3M14 8L9 13" stroke={input.trim() && !loading ? "#fff" : "#aaa"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </button>
         </div>
       </div>
-
-      <style>{`
-        @keyframes pulse {
-          0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
-          30% { transform: translateY(-5px); opacity: 1; }
-        }
-        textarea::placeholder { color: rgba(255,255,255,0.35); }
-        textarea:focus { border-color: rgba(255, 255, 255, 0.6) !important; }
-        .md-content p { margin: 0 0 8px; }
-        .md-content p:last-child { margin: 0; }
-        .md-content ul, .md-content ol { padding-left: 18px; margin: 0 0 8px; }
-        .md-content li { margin-bottom: 3px; }
-        .md-content strong { font-weight: 600; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
-      `}</style>
-    </div>
+    </>
   );
 }
